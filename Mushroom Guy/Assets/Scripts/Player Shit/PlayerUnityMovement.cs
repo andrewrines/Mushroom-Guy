@@ -2,6 +2,8 @@
 using System.Collections;
 using System;
 
+public enum PlayerRotationType { Locked,Movement,Camera}
+
 [RequireComponent(typeof(PlayerController))]
 public class PlayerUnityMovement : MonoBehaviour
 {
@@ -10,6 +12,7 @@ public class PlayerUnityMovement : MonoBehaviour
 
     public float jumpHeight = 2f;
     public float movementSpeed = 10f;
+    public float rotationRate = 90.0f;
 
     private Vector3 moveTranslation;
 
@@ -17,11 +20,15 @@ public class PlayerUnityMovement : MonoBehaviour
     private bool canMove = true;
     private bool canJump = true;
 
+    public PlayerRotationType RotationType = PlayerRotationType.Movement;
+
     void Awake()
     {
         controller = this.GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
 
+        // lock cursor //
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
@@ -29,6 +36,7 @@ public class PlayerUnityMovement : MonoBehaviour
         if (controller.MovementInput && canMove) 
         { 
             UpdateMovement();
+            UpdateRotation();
         }
         if (canJump)
         {
@@ -53,10 +61,52 @@ public class PlayerUnityMovement : MonoBehaviour
         //rb.AddForce(moveTranslation);
     }
 
+    private void UpdateRotation()
+    {
+        // this rotates the player 
+        switch (RotationType)
+        {
+            case PlayerRotationType.Movement:
+                // movement rotates towards the movement direction
+                // if receiving movement input only
+                if (controller.MovementInput)
+                {
+                    Quaternion NewRotation = Quaternion.LookRotation(moveTranslation);
+                    NewRotation = Quaternion.Slerp(transform.rotation, NewRotation, Time.deltaTime * rotationRate);
+
+                    transform.rotation = NewRotation;
+                }
+                break;
+            case PlayerRotationType.Camera:
+                // rotates towards the direction the camera is facing
+                if (controller.MovementInput)
+                {
+                    Vector3 L = transform.position - Camera.main.transform.position;
+                    L.y = 0.0f;
+
+                    Quaternion NewRotation = Quaternion.LookRotation(L);
+                    NewRotation = Quaternion.Slerp(transform.rotation, NewRotation, Time.deltaTime * rotationRate);
+
+                    transform.rotation = NewRotation;
+                }
+                break;
+            case PlayerRotationType.Locked:
+                // locks rotation
+                break;
+       
+        }
+    }
+
     private void CreateMoveTranslationBasedOnPerspective()  //If we ever decide to have a 2D movement section
     {
+        // torben testing something
+        T_Set3DMoveTranslation();
+
+        
+        /*
         if (movement2D) { Set2DMoveTranslation(); }
         else { Set3DMoveTranslation(); }
+        */
     }
 
     private void Set2DMoveTranslation() //Unneeded FOR NOW
@@ -83,6 +133,26 @@ public class PlayerUnityMovement : MonoBehaviour
             moveTranslation += -transform.forward;
         }
 
+        moveTranslation *= Time.deltaTime * movementSpeed;
+    }
+
+    public void T_Set3DMoveTranslation()
+    {
+        // Torben testing something
+        // this code creates a moveTranslation vector based on the direction of the camera without rotating the character
+        
+
+        Vector3 Forward = Camera.main.transform.forward;
+        Vector3 Right = Camera.main.transform.right;
+
+        Forward.y = 0.0f;
+        Right.y = 0.0f;
+
+        Forward.Normalize();
+        Right.Normalize();
+
+        moveTranslation = (Forward * controller.direction.y) + (Right * controller.direction.x);
+        moveTranslation.Normalize();
         moveTranslation *= Time.deltaTime * movementSpeed;
     }
 
