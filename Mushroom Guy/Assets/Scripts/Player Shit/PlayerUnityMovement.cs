@@ -11,6 +11,7 @@ public class PlayerUnityMovement : MonoBehaviour
     private Rigidbody rb;
 
     public float jumpHeight = 2f;
+    public float trampolineJumpHeight = 100f;
     public float movementSpeed = 10f;
     public float rotationRate = 90.0f;
 
@@ -159,5 +160,12 @@ public class PlayerUnityMovement : MonoBehaviour
     public void ToggleMovement(bool enabled)    //Call if movement ever needs to be stopped/started
     {
         canMove = enabled;
+    }
+
+    //Ed Trampoline Jump Function
+
+    public void trampolineJump ()
+    {
+        rb.AddForce(0, trampolineJumpHeight, 0, ForceMode.Impulse);
     }
 }
