@@ -10,10 +10,14 @@ public class PlayerUnityMovement : MonoBehaviour
     private PlayerController controller;
     private Rigidbody rb;
 
+    float DistanceToTheGround = 0.0f;
+    bool bGrounded = false;
+
     public float jumpHeight = 2f;
     public float trampolineJumpHeight = 100f;
     public float movementSpeed = 10f;
     public float rotationRate = 90.0f;
+    
 
     private Vector3 moveTranslation;
 
@@ -21,10 +25,14 @@ public class PlayerUnityMovement : MonoBehaviour
     private bool canMove = true;
     private bool canJump = true;
 
+
+
     public PlayerRotationType RotationType = PlayerRotationType.Movement;
 
     void Awake()
     {
+        DistanceToTheGround = GetComponent<Collider>().bounds.extents.y;
+
         controller = this.GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
 
@@ -34,6 +42,8 @@ public class PlayerUnityMovement : MonoBehaviour
 
     void Update()
     {
+        bGrounded = Physics.Raycast(transform.position, Vector3.down, DistanceToTheGround + 0.1f);
+
         if (controller.MovementInput && canMove) 
         { 
             UpdateMovement();
@@ -47,8 +57,10 @@ public class PlayerUnityMovement : MonoBehaviour
 
     private void Jump()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && bGrounded)
         {
+            
+
             Debug.Log("jump man");
             rb.AddForce(0, jumpHeight, 0, ForceMode.Impulse);
         }
@@ -58,8 +70,12 @@ public class PlayerUnityMovement : MonoBehaviour
     private void UpdateMovement()
     {
         CreateMoveTranslationBasedOnPerspective();
+
+
+
         transform.position += moveTranslation;
-        //rb.AddForce(moveTranslation);
+        //rb.AddForce(moveTranslation * movementSpeed);
+        
     }
 
     private void UpdateRotation()
@@ -141,8 +157,7 @@ public class PlayerUnityMovement : MonoBehaviour
     {
         // Torben testing something
         // this code creates a moveTranslation vector based on the direction of the camera without rotating the character
-        
-
+ 
         Vector3 Forward = Camera.main.transform.forward;
         Vector3 Right = Camera.main.transform.right;
 
@@ -155,6 +170,9 @@ public class PlayerUnityMovement : MonoBehaviour
         moveTranslation = (Forward * controller.direction.y) + (Right * controller.direction.x);
         moveTranslation.Normalize();
         moveTranslation *= Time.deltaTime * movementSpeed;
+        
+
+       
     }
 
     public void ToggleMovement(bool enabled)    //Call if movement ever needs to be stopped/started
