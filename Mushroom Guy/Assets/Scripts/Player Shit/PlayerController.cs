@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
     public KeyCode down = KeyCode.S;
     public KeyCode right = KeyCode.D;
     public KeyCode space = KeyCode.Space;
+    public KeyCode shift = KeyCode.LeftShift;
+    public KeyCode ctrl = KeyCode.LeftControl;
 
     //direction vectors for movement
     [HideInInspector] public Vector2 direction = new Vector2(0, 0);
