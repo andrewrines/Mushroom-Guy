@@ -736,6 +736,7 @@ MonoBehaviour:
   trampolineJumpHeight: 100
   GroundMoveSpeed: 0.05
   SprintModifier: 1.5
+  SneakModifier: 0.5
   GroundDeceleration: 0.7
   AirMoveSpeed: 0.005
   AirDeceleration: 0.98
