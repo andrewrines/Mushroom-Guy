@@ -11,21 +11,21 @@ public class T_PlayerMovementScript : MonoBehaviour
     float DistanceToTheGround = 0.0f;
     bool bGrounded = false;
 
-    public float jumpHeight = 2f;
-    public float JumpStrength = 20.0f;
-    public float trampolineJumpHeight = 100f;
-    public float GroundMoveSpeed = 0.1f;
+    public float jumpHeight = 0.1f;
+    public float JumpStrength = 0.5f;
+    public float trampolineJumpHeight = 0.2f;
+    public float GroundMoveSpeed = 0.05f;
     public float SprintModifier = 1.5f;
     public float SneakModifier = 0.5f;
-    public float GroundDeceleration = 0.8f;
-    public float AirMoveSpeed = 0.05f;
-    public float AirDeceleration = 0.95f;
-    public float AirControl = 0.1f;
+    public float GroundDeceleration = 0.7f;
+    public float AirMoveSpeed = 0.01f;
+    public float AirDeceleration = 0.98f;
+    //public float AirControl = 0.1f;
     public float rotationRate = 90.0f;
 
 
     private Vector3 MyVelocity = new Vector3(0.0f, 0.0f, 0.0f);
-    public float MaxVelocity = 0.16f;
+    //public float MaxVelocity = 0.16f;
     public float Speed = 0.0f;
 
     public bool movement2D = false;
@@ -43,7 +43,7 @@ public class T_PlayerMovementScript : MonoBehaviour
 
     void Awake()
     {
-        DistanceToTheGround = GetComponent<Collider>().bounds.extents.y;
+        
 
         controller = this.GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
@@ -60,6 +60,28 @@ public class T_PlayerMovementScript : MonoBehaviour
     }
 
     private void FixedUpdate()
+    {
+        FixedUpdateMovement();
+
+        
+    }
+
+    private void Jump()
+    {
+        if (Input.GetKeyDown(KeyCode.Space) && CC.isGrounded)
+        {
+            print("Jump");
+            Vector3 JumpVector = MyVelocity;
+            JumpVector.y = jumpHeight;
+
+            MyVelocity.y = JumpVector.y;
+        }
+
+    }
+
+    
+
+    private void FixedUpdateMovement()
     {
         CC.Move(MyVelocity);
 
@@ -82,7 +104,7 @@ public class T_PlayerMovementScript : MonoBehaviour
                 MyVelocity += MoveVector * GroundMoveSpeed;
             }
 
-            
+
 
             MyVelocity *= GroundDeceleration;
 
@@ -108,32 +130,7 @@ public class T_PlayerMovementScript : MonoBehaviour
 
 
         Speed = R.magnitude;
-        
 
-        
-    }
-
-    private void Jump()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) && CC.isGrounded)
-        {
-            print("Jump");
-            Vector3 JumpVector = MyVelocity;
-            JumpVector.y = jumpHeight;
-
-            MyVelocity.y = JumpVector.y;
-        }
-
-    }
-
-    private void UpdateMovement()
-    {
-        Vector3 MoveVector = T_GetMoveVector();
-
-        //transform.position += moveTranslation;
-        //transform.Translate(MoveVector * movementSpeed * Time.deltaTime);
-        //rb.AddForce(MoveVector * movementSpeed);
-        //transform.position += (MoveVector * movementSpeed * Time.deltaTime);
 
     }
 
@@ -179,7 +176,7 @@ public class T_PlayerMovementScript : MonoBehaviour
     public Vector3 T_GetMoveVector()
     {
         // Torben testing something
-        // this code creates a moveTranslation vector based on the direction of the camera without rotating the character
+        // this code creates a move vector based on the direction of the camera without rotating the character
 
         Vector3 NewMoveVector = new Vector3(0.0f, 0.0f, 0.0f);
 
