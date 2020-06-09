@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum T_PlayerState { Idle,Moving,Falling,Gliding}
+
 public class T_PlayerMovementScript : MonoBehaviour
 {
     private PlayerController controller;
@@ -21,18 +23,22 @@ public class T_PlayerMovementScript : MonoBehaviour
     public float AirMoveSpeed = 0.01f;
     public float AirDeceleration = 0.98f;
     //public float AirControl = 0.1f;
+    public float Gravity = 0.01f;
+    public float GravityScale = 1.0f;
+    public float GlidingGravityScale = 0.2f;
     public float rotationRate = 90.0f;
 
 
-    private Vector3 MyVelocity = new Vector3(0.0f, 0.0f, 0.0f);
-    //public float MaxVelocity = 0.16f;
+    public Vector3 MyVelocity = new Vector3(0.0f, 0.0f, 0.0f);
+    public float MinYVelocity = -0.5f;
+    
     public float Speed = 0.0f;
 
     public bool movement2D = false;
     private bool canMove = true;
     private bool canJump = true;
 
-
+    public T_PlayerState MyPlayerState = T_PlayerState.Idle;
 
     public PlayerRotationType RotationType = PlayerRotationType.Movement;
 
@@ -68,13 +74,21 @@ public class T_PlayerMovementScript : MonoBehaviour
 
     private void Jump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && CC.isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            print("Jump");
-            Vector3 JumpVector = MyVelocity;
-            JumpVector.y = jumpHeight;
+            if (MyPlayerState == T_PlayerState.Idle || MyPlayerState == T_PlayerState.Moving)
+            {
+                print("Jump");
+                Vector3 JumpVector = MyVelocity;
+                JumpVector.y = jumpHeight;
 
-            MyVelocity.y = JumpVector.y;
+                MyVelocity.y = JumpVector.y;
+            }
+            else if (MyPlayerState == T_PlayerState.Falling)
+            {
+                SwitchPlayerState(T_PlayerState.Gliding);
+            }
+            
         }
 
     }
@@ -114,7 +128,8 @@ public class T_PlayerMovementScript : MonoBehaviour
 
             }
             MyVelocity.y = 0.0f;
-            MyVelocity.y -= 0.01f;
+            MyVelocity.y -= (Gravity * GravityScale);
+            
         }
         else
         {
@@ -122,14 +137,63 @@ public class T_PlayerMovementScript : MonoBehaviour
 
             MyVelocity *= AirDeceleration;
             MyVelocity.y = Y;
-            MyVelocity.y -= 0.01f;
+            MyVelocity.y -= (Gravity * GravityScale);
+        }
+
+        if (MyVelocity.y < MinYVelocity * GravityScale)
+        {
+            MyVelocity.y = MinYVelocity * GravityScale;
         }
 
         Vector3 R = MyVelocity;
         R.y = 0.0f;
 
-
         Speed = R.magnitude;
+
+        if (CC.isGrounded)
+        {
+            GravityScale = 1.0f;
+
+            if (MyVelocity.magnitude > 0.01)
+            {
+                SwitchPlayerState(T_PlayerState.Moving);
+            }
+            else
+            {
+                SwitchPlayerState(T_PlayerState.Idle);
+            }
+        }
+        else
+        {
+            if (MyPlayerState == T_PlayerState.Gliding)
+            {
+                if (Input.GetKey(KeyCode.Space))
+                {
+                    if (MyVelocity.y > 0.0f)
+                    {
+                        // rising 
+                        GravityScale = 1.0f;
+                    }
+                    else
+                    {
+                        // falling
+                        GravityScale = GlidingGravityScale;
+                    }
+                }
+                else
+                {
+                    GravityScale = 1.0f;
+                    SwitchPlayerState(T_PlayerState.Falling);
+                }
+            }
+            else if (MyPlayerState != T_PlayerState.Falling)
+            {
+                GravityScale = 1.0f;
+                SwitchPlayerState(T_PlayerState.Falling);
+            }
+            
+        }
+       
 
 
     }
@@ -200,5 +264,23 @@ public class T_PlayerMovementScript : MonoBehaviour
     public void ToggleMovement(bool enabled)    //Call if movement ever needs to be stopped/started
     {
         canMove = enabled;
+    }
+
+    private void SwitchPlayerState(T_PlayerState NewPlayerState)
+    {
+        MyPlayerState = NewPlayerState;
+
+        switch (MyPlayerState)
+        {
+            case T_PlayerState.Idle:
+                
+                break;
+            case T_PlayerState.Moving:
+                break;
+            case T_PlayerState.Falling:
+                break;
+            case T_PlayerState.Gliding:
+                break;
+        }
     }
 }

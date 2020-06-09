@@ -50,6 +50,8 @@ public class T_3rdPersonCameraScript : MonoBehaviour
 
     void LateUpdate()
     {
+        
+
         if (canMoveCamera)
         {
             RotateCamera();

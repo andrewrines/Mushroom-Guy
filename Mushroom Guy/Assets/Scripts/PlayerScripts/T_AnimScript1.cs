@@ -25,6 +25,8 @@ public class T_AnimScript1 : MonoBehaviour
                 A.SetFloat("Speed", TargetPlayerMovementScript.Speed);
 
                 A.SetBool("Falling", !TargetPlayerMovementScript.CC.isGrounded);
+
+                A.SetBool("Gliding", TargetPlayerMovementScript.MyPlayerState == T_PlayerState.Gliding);
             }
             
         }
